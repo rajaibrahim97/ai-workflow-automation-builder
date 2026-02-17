@@ -11,3 +11,4 @@ const Layout = ({children}:{children: React.ReactNode}) => {
         </SidebarProvider>
     )
 }
+export default Layout
