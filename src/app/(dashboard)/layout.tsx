@@ -1,5 +1,6 @@
 import { AppSidebar } from "@/components/app-sidebar"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
+import '@xyflow/react/dist/style.css';
 
 const Layout = ({children}:{children: React.ReactNode}) => {
     return (
