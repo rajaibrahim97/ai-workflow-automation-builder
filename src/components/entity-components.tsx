@@ -337,7 +337,7 @@ export const EntityItem = ({
                         </div>
                     </div>
                     {(actions || onRemove) && (
-                        <div className="flex gapx4 items-center">
+                        <div className="flex gap-x-4 items-center">
                             {actions}
                             {onRemove && (
                                 <DropdownMenu>
