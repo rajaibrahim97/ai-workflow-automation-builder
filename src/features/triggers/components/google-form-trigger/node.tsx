@@ -13,7 +13,7 @@ type ManualTriggerNodeData = {
 
 type ManualTriggerNodeType = Node<ManualTriggerNodeData>;
 
-export const ManualTriggerNode = memo((props:NodeProps<ManualTriggerNodeType>) => {
+export const GoogleFormTrigger = memo((props:NodeProps<ManualTriggerNodeType>) => {
     const [dialogOpen, setDialogOpen] = useState(false);
      const channel = useMemo(()=>{
             return manualTriggerChannel({
@@ -24,11 +24,12 @@ export const ManualTriggerNode = memo((props:NodeProps<ManualTriggerNodeType>) =
         const refreshToken =  useCallback(()=>{
             return fetchManualTriggerWorkflowToken(props.data.workflowId)
         },[props.data.workflowId]);
-    const nodeStatus = useNodeStatus({
-        nodeId:props.id,
-        channel,
-        refreshToken,
-    });
+    // const nodeStatus = useNodeStatus({
+    //     nodeId:props.id,
+    //     channel,
+    //     refreshToken,
+    // });
+    const nodeStatus = "initial"
 
     const handleOpenSettings = () => setDialogOpen(true);
 
@@ -40,8 +41,8 @@ export const ManualTriggerNode = memo((props:NodeProps<ManualTriggerNodeType>) =
             />
             <BaseTriggerNode 
                 {...props}
-                icon={MousePointerIcon}
-                name="When clicking 'Execute workflow'"
+                icon="/logos/googleform.svg"
+                name="When form is submitted"
                 status={nodeStatus}
                 onSettings={handleOpenSettings}
                 onDoubleClick={handleOpenSettings}

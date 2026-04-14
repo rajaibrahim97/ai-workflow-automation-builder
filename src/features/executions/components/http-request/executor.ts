@@ -2,6 +2,7 @@ import Handlebars from "handlebars";
 import { NonRetriableError } from "inngest";
 import { NodeExecutor } from "../../types";
 import ky, { type Options as KyOptions } from "ky";
+import { httpRequestChannel } from "@/inngest/channels/http-request";
 
 Handlebars.registerHelper("json", (context) => {
     const jsonString = JSON.stringify(context,null,2);
@@ -19,26 +20,48 @@ type HttpRequestData = {
 export const httpRequestExecutor: NodeExecutor<HttpRequestData> = async ({
     data,
     nodeId,
+    workflowId,
     context,
     step,
 }) => {
-    // TODO: Publish "Loading" state for http request
+    // Publish "Loading" state for http request
+    const channel = httpRequestChannel({workflowId})
+    console.log("[Executor] Publishing node-loading", { nodeId });
+    await step.realtime.publish("node-loading", channel.status,{
+        nodeId,
+        status:"loading"
+    })
 
     if(!data.endpoint){
-        // TODO: Publish "error" state for http request
+        // Publish "error" state for http request
+        console.log("[Executor] Publishing node-error", { nodeId });
+        await step.realtime.publish("node-error", channel.status, {
+            nodeId,
+            status:"error"
+        });
         throw new NonRetriableError("HTTP Request node: No endpoint configured");
     }
     if(!data.variableName){
-        // TODO: Publish "error" state for http request
+        // Publish "error" state for http request
+        console.log("[Executor] Publishing node-error", { nodeId });
+        await step.realtime.publish("node-error", channel.status, {
+            nodeId,
+            status:"error"
+        });
         throw new NonRetriableError("Variable name not configured");
     }
 
     if(!data.method){
-        // TODO: Publish "error" state for http request
+        // Publish "error" state for http request
+        console.log("[Executor] Publishing node-error", { nodeId });
+        await step.realtime.publish("node-error", channel.status, {
+            nodeId,
+            status:"error"
+        });
         throw new NonRetriableError("Method not configured");
     }
-
-    const result = await step.run("http-request", async () => {
+    try {
+         const result = await step.run("http-request", async () => {
         const endpoint = Handlebars.compile(data.endpoint)(context);
         const method = data.method;
         const options: KyOptions = { method };
@@ -72,7 +95,20 @@ export const httpRequestExecutor: NodeExecutor<HttpRequestData> = async ({
     
     });
 
-    // TODO: Publish "success" state for http request
+    // Publish "success" state for http request
+    console.log("[Executor] Publishing node-success", { nodeId });
+    await step.realtime.publish("node-success", channel.status, {
+            nodeId,
+            status:"success",
+        });
 
     return result;
+    } catch (error) {
+        await step.realtime.publish("node-error", channel.status, {
+            nodeId,
+            status:"error"
+        });
+        throw error;
+    }
+   
 }
