@@ -44,7 +44,7 @@ export const Editor = ({ workflowId }: { workflowId: string }) => {
   const setEditor = useSetAtom(editorAtom)
   const [nodes, setNodes] = useState<Node[]>(workflow.nodes);
   const [edges, setEdges] = useState<Edge[]>(workflow.edges);
-
+  
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => setNodes((nodesSnapshot) => applyNodeChanges(changes, nodesSnapshot)),
     [],
@@ -61,6 +61,7 @@ export const Editor = ({ workflowId }: { workflowId: string }) => {
   const hasManualTrigger = useMemo(()=>{
     return nodes.some((node) => node.type === NodeType.MANUAL_TRIGGER)
   },[nodes])
+
 
   return (
     <div className='size-full'>

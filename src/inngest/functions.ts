@@ -8,15 +8,20 @@ import { NonRetriableError } from "inngest";
 import { topologicalSort } from "./utils";
 import { getExecutor } from "@/features/executions/executor-registry";
 import { NodeType } from "@/generated/prisma";
+import { httpRequestChannel } from "./channels/http-request";
+
 
 const google = createGoogleGenerativeAI();
 const openai = createOpenAI();
 const anthropic = createAnthropic();
 
 
-export const execute = inngest.createFunction(
-  { id: "execute-workflow" },
-  { event: "workflows/execute.workflow" },
+export const executeWorkflow = inngest.createFunction(
+  { 
+    id: "execute-workflow",
+    triggers: [{ event: "workflows/execute.workflow" } ]
+  },
+ 
 
   async ({event, step}) => {
     const workflowId = event.data.workflowId;
@@ -24,6 +29,8 @@ export const execute = inngest.createFunction(
     if (!workflowId) {
         throw new NonRetriableError("Workflow ID is missing");
     }
+    
+    
 
     const sortedNodes = await step.run("prepare-workflow", async () => {
       const workflow = await prisma.workflow.findUniqueOrThrow({
@@ -35,21 +42,25 @@ export const execute = inngest.createFunction(
       })
       return topologicalSort(workflow.nodes, workflow.connections);
       
-      // Execute each node
       
     })
     // Initialize context with any initial data from the trigger
     let context = event.data.initialData || {};
 
+
+   
     // Execute each node
 
     for (const node of sortedNodes){
       const executor = getExecutor(node.type as NodeType);
+      // Create a channel for the workflow 
+      const channel = httpRequestChannel({workflowId})
       context = await executor({
         data: node.data as Record<string, unknown>,
         nodeId: node.id,
         context,
         step,
+        workflowId,
       })
     }
 
