@@ -9,7 +9,7 @@ export const nodeComponents = {
     [NodeType.INITIAL]: InitialNode,
     [NodeType.HTTP_REQUEST]: HttpRequestNode,
     [NodeType.MANUAL_TRIGGER]: ManualTriggerNode,
-    // [NodeType.GOOGLE_FORM_TRIGGER]: GoogleFormTrigger,
+    [NodeType.GOOGLE_FORM_TRIGGER]: GoogleFormTrigger,
 } as const satisfies NodeTypes;
 
 export type RegiseredNodeType = keyof typeof nodeComponents;
