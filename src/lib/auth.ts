@@ -12,6 +12,10 @@ export const auth = betterAuth({
         enabled:true,
         autoSignIn:true,
     },
+    trustedOrigins: [
+  "http://localhost:3000",
+  process.env.NGROK_URL!
+],
     plugins: [
         polar({
             client: polarClient,

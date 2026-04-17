@@ -9,7 +9,8 @@
     "lint": "biome check",
     "format": "biome format --write",
     "inngest:dev": "inngest-cli dev",
-    "dev:all": "mprocs"
+    "dev:all": "dotenv -- mprocs",
+    "ngrok:dev": "ngrok http --url=bulldog-patience-ritzy.ngrok-free.dev 3000"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.43",
@@ -74,6 +75,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/toposort": "^2.0.7",
+    "dotenv-cli": "^11.0.0",
     "inngest-cli": "^1.17.0",
     "mprocs": "^0.8.3",
     "prisma": "^7.3.0",
