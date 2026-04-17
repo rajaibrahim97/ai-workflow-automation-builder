@@ -2,17 +2,17 @@
 
 import { getClientSubscriptionToken } from "inngest/react";
 import { inngest } from "@/inngest/client";
-import { manualTriggerChannel } from "@/inngest/channels/manual-trigger";
 import { Realtime } from "inngest";
+import { googleFormTriggerChannel } from "@/inngest/channels/google-form-trigger";
 
-type ManualTriggerToken = Realtime.Subscribe.Token<
-  typeof manualTriggerChannel,
+type GoogleFormTriggerToken = Realtime.Subscribe.Token<
+  typeof googleFormTriggerChannel,
   ["status"]
 >;
-export async function fetchManualTriggerWorkflowToken(workflowId: string):Promise<ManualTriggerToken> {
+export async function fetchGoogleFormTriggerRealtimeToken(workflowId: string):Promise<GoogleFormTriggerToken> {
     const token = await getClientSubscriptionToken(inngest, {
-    channel: manualTriggerChannel({workflowId}),
+    channel: googleFormTriggerChannel({workflowId}),
     topics: ["status"],
   });
-  return token as ManualTriggerToken
+  return token as GoogleFormTriggerToken
 }

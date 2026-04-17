@@ -2,47 +2,48 @@ import { Node, NodeProps } from "@xyflow/react";
 import { memo, useCallback, useMemo, useState } from "react";
 import { BaseTriggerNode  } from "../base-trigger-node";
 import { MousePointerIcon } from "lucide-react";
-import { ManualTriggerDialog } from "./dialog";
+import { GoogleFormTriggerDialog } from "./dialog";
 import { useNodeStatus } from "@/features/executions/hooks/use-node-status";
-import { manualTriggerChannel } from "@/inngest/channels/manual-trigger";
-import { fetchManualTriggerWorkflowToken } from "./action";
+import { fetchGoogleFormTriggerRealtimeToken } from "./action";
+import { googleFormTriggerChannel } from "@/inngest/channels/google-form-trigger";
 
-type ManualTriggerNodeData = {
+type GoogleFormNodeData = {
     workflowId: string;
 };
 
-type ManualTriggerNodeType = Node<ManualTriggerNodeData>;
+type GoogleFormTriggerNodeType = Node<GoogleFormNodeData>;
 
-export const GoogleFormTrigger = memo((props:NodeProps<ManualTriggerNodeType>) => {
+export const GoogleFormTrigger = memo((props:NodeProps<GoogleFormTriggerNodeType>) => {
     const [dialogOpen, setDialogOpen] = useState(false);
      const channel = useMemo(()=>{
-            return manualTriggerChannel({
+            return googleFormTriggerChannel({
             workflowId:props.data.workflowId
         })
         },[props.data.workflowId]);
     
         const refreshToken =  useCallback(()=>{
-            return fetchManualTriggerWorkflowToken(props.data.workflowId)
+            return fetchGoogleFormTriggerRealtimeToken(props.data.workflowId)
         },[props.data.workflowId]);
-    // const nodeStatus = useNodeStatus({
-    //     nodeId:props.id,
-    //     channel,
-    //     refreshToken,
-    // });
-    const nodeStatus = "initial"
+    const nodeStatus = useNodeStatus({
+        nodeId:props.id,
+        channel,
+        refreshToken,
+    });
+    
 
     const handleOpenSettings = () => setDialogOpen(true);
 
     return (
         <>
-            <ManualTriggerDialog 
+            <GoogleFormTriggerDialog 
                 open={dialogOpen}
                 onOpenChange={setDialogOpen}
             />
             <BaseTriggerNode 
                 {...props}
                 icon="/logos/googleform.svg"
-                name="When form is submitted"
+                name="Google Form"
+                description="When form is submitted"
                 status={nodeStatus}
                 onSettings={handleOpenSettings}
                 onDoubleClick={handleOpenSettings}
