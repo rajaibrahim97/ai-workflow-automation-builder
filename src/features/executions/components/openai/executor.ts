@@ -1,0 +1,108 @@
+import Handlebars from "handlebars";
+import { NonRetriableError } from "inngest";
+import { NodeExecutor } from "../../types";
+import { httpRequestChannel } from "@/inngest/channels/http-request";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { generateText } from "ai";
+import { openaiChannel } from "@/inngest/channels/openai";
+import { createOpenAI } from "@ai-sdk/openai";
+
+Handlebars.registerHelper("json", (context) => {
+    const jsonString = JSON.stringify(context, null, 2);
+    const safeString = new Handlebars.SafeString(jsonString);
+    return safeString;
+});
+
+type OpenAiData = {
+    variableName: string;
+    systemPrompt?: string;
+    userPrompt?: string
+}
+
+export const openAiExecutor: NodeExecutor<OpenAiData> = async ({
+    data,
+    nodeId,
+    workflowId,
+    context,
+    step,
+}) => {
+    // Publish "Loading" state for http request
+    const channel = openaiChannel({ workflowId })
+    console.log("[Executor] Publishing node-loading", { nodeId });
+    await step.realtime.publish("node-loading", channel.status, {
+        nodeId,
+        status: "loading"
+    })
+
+    if (!data.variableName) {
+        // Publish "error" state for http request
+        console.log("[Executor] Publishing node-error", { nodeId });
+        await step.realtime.publish("node-error", channel.status, {
+            nodeId,
+            status: "error"
+        });
+        throw new NonRetriableError("OpenAi node: Variable name is missing");
+    }
+
+
+    if (!data.userPrompt) {
+        // Publish "error" state for http request
+        console.log("[Executor] Publishing node-error", { nodeId });
+        await step.realtime.publish("node-error", channel.status, {
+            nodeId,
+            status: "error"
+        });
+        throw new NonRetriableError("OpenAi node: User prompt is missing");
+    }
+
+    // TODO : FETCH credential throw error if missing 
+    const systemPrompt = data.systemPrompt
+        ? Handlebars.compile(data.systemPrompt)(context)
+        : "You are a helpful assistant.";
+    const userPrompt = Handlebars.compile(data.userPrompt)(context);
+
+    //TODO: Fetch credential that user selected
+    const credentialValue = process.env.OPENAI_API_KEY!;
+    const openai = createOpenAI({
+        apiKey: credentialValue
+    })
+    try {
+        const { steps } = await step.ai.wrap(
+            "gemini-generate-text",
+            generateText,
+            {
+                model: openai("gpt-4"),
+                system: systemPrompt,
+                prompt: userPrompt,
+                experimental_telemetry: {
+                    isEnabled: true,
+                    recordInputs: true,
+                    recordOutputs: true,
+                }
+            }
+        );
+
+        const text = steps[0].content[0].type === "text" ? steps[0]
+        .content[0].text: "";
+
+        await step.realtime.publish("node-success", channel.status, {
+            nodeId,
+            status: "success",
+        });
+
+        return {
+      ...context,
+      [data.variableName]: {
+        text,
+      },
+    }
+
+
+    } catch (error) {
+        await step.realtime.publish("node-error", channel.status, {
+            nodeId,
+            status: "error"
+        });
+        throw error
+    }
+}
