@@ -11,10 +11,6 @@ import { NodeType } from "@/generated/prisma";
 import { httpRequestChannel } from "./channels/http-request";
 
 
-const google = createGoogleGenerativeAI();
-const openai = createOpenAI();
-const anthropic = createAnthropic();
-
 
 export const executeWorkflow = inngest.createFunction(
   { 
@@ -38,12 +34,23 @@ export const executeWorkflow = inngest.createFunction(
         include:{
           nodes: true,
           connections: true,
-        }
+        },
       })
       return topologicalSort(workflow.nodes, workflow.connections);
       
       
     })
+
+    const userId = await step.run("find-user-id", async () => {
+      const workflow = await prisma.workflow.findUniqueOrThrow({
+        where:{id:workflowId},
+        select:{
+          userId: true,
+        },
+      });
+
+      return workflow.userId;
+    });
     // Initialize context with any initial data from the trigger
     let context = event.data.initialData || {};
 
@@ -53,11 +60,10 @@ export const executeWorkflow = inngest.createFunction(
 
     for (const node of sortedNodes){
       const executor = getExecutor(node.type as NodeType);
-      // Create a channel for the workflow 
-      const channel = httpRequestChannel({workflowId})
       context = await executor({
         data: node.data as Record<string, unknown>,
         nodeId: node.id,
+        userId,
         context,
         step,
         workflowId,

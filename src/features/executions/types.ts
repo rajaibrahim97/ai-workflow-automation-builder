@@ -10,6 +10,7 @@ export interface NodeExecutorParams<TData = Record<string, unknown>> {
     context:WorkflowContext;
     step: StepTools;
     workflowId:string;
+    userId: string,
     // publish: TODO Add realtime Later
     // publish: any;
     // channel: ReturnType<typeof httpRequestChannel>

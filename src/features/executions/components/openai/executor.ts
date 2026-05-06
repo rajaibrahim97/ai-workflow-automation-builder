@@ -6,6 +6,7 @@ import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { generateText } from "ai";
 import { openaiChannel } from "@/inngest/channels/openai";
 import { createOpenAI } from "@ai-sdk/openai";
+import prisma from "@/lib/db";
 
 Handlebars.registerHelper("json", (context) => {
     const jsonString = JSON.stringify(context, null, 2);
@@ -15,6 +16,7 @@ Handlebars.registerHelper("json", (context) => {
 
 type OpenAiData = {
     variableName: string;
+    credentialId?: string;
     systemPrompt?: string;
     userPrompt?: string
 }
@@ -22,6 +24,7 @@ type OpenAiData = {
 export const openAiExecutor: NodeExecutor<OpenAiData> = async ({
     data,
     nodeId,
+    userId,
     workflowId,
     context,
     step,
@@ -43,7 +46,17 @@ export const openAiExecutor: NodeExecutor<OpenAiData> = async ({
         });
         throw new NonRetriableError("OpenAi node: Variable name is missing");
     }
+    if (!data.credentialId) {
+        // Publish "error" state for http request
+        console.log("[Executor] Publishing node-error", { nodeId });
+        await step.realtime.publish("node-error", channel.status, {
+            nodeId,
+            status: "error"
+        });
+        throw new NonRetriableError("OpenAi node: Credential is required");
+    }
 
+    
 
     if (!data.userPrompt) {
         // Publish "error" state for http request
@@ -55,16 +68,29 @@ export const openAiExecutor: NodeExecutor<OpenAiData> = async ({
         throw new NonRetriableError("OpenAi node: User prompt is missing");
     }
 
-    // TODO : FETCH credential throw error if missing 
     const systemPrompt = data.systemPrompt
         ? Handlebars.compile(data.systemPrompt)(context)
         : "You are a helpful assistant.";
     const userPrompt = Handlebars.compile(data.userPrompt)(context);
 
-    //TODO: Fetch credential that user selected
-    const credentialValue = process.env.OPENAI_API_KEY!;
+    const credential = await step.run("get-credential", () => {
+    return prisma.credential.findUnique({
+      where: {
+        id: data.credentialId,
+        userId
+      },
+    });
+  });
+
+  if (!credential) {
+    await step.realtime.publish("node-error", channel.status, {
+            nodeId,
+            status: "error"
+        });
+    throw new NonRetriableError("OpenAI node: Credential not found");
+  }
     const openai = createOpenAI({
-        apiKey: credentialValue
+        apiKey: credential.value
     })
     try {
         const { steps } = await step.ai.wrap(

@@ -12,6 +12,7 @@ import { fetchOpenAiRealtimeToken } from "./actions";
 type OpenaiNodeData = {
     workflowId: string;
     variableName?: string;
+    credentialId?: string;
     systemPrompt?:string;
     userPrompt?:string;
 }
