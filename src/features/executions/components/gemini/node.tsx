@@ -12,6 +12,7 @@ import { fetchGeminiRealtimeToken } from "./actions";
 type GeminiNodeData = {
     workflowId: string;
     variableName?: string;
+    credentialId?: string;
     systemPrompt?:string;
     userPrompt?:string;
 }
