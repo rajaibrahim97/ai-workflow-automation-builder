@@ -5,6 +5,7 @@ import z from "zod";
 import { PAGINATION } from "@/config/constants";
 import type { Node, Edge } from "@xyflow/react";
 import { CredentialType, NodeType } from "@/generated/prisma"
+import { encrypt } from "@/lib/encrypt";
 
 
 export const credentialsRouter = createTRPCRouter({
@@ -24,7 +25,7 @@ export const credentialsRouter = createTRPCRouter({
                     name,
                     userId: ctx.auth.user.id,
                     type,
-                    value // TODO: Consider encrytping in production
+                    value: encrypt(value),
                 },
             })
         }),
@@ -55,7 +56,7 @@ export const credentialsRouter = createTRPCRouter({
                 data: {
                     name,
                     type,
-                    value, // TODO: Consider encrypting in production
+                    value: encrypt(value),
                 }
             });
         }),

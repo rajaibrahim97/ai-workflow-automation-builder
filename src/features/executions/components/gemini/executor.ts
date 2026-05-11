@@ -5,6 +5,7 @@ import { httpRequestChannel } from "@/inngest/channels/http-request";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { generateText } from "ai";
 import prisma from "@/lib/db";
+import { decrypt } from "@/lib/encrypt";
 
 Handlebars.registerHelper("json", (context) => {
     const jsonString = JSON.stringify(context, null, 2);
@@ -87,7 +88,7 @@ export const geminiExecutor: NodeExecutor<GeminiData> = async ({
     }
 
     const google = createGoogleGenerativeAI({
-        apiKey: credential.value
+        apiKey: decrypt(credential.value),
     })
     try {
         const { steps } = await step.ai.wrap(

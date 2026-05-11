@@ -8,6 +8,7 @@ import { openaiChannel } from "@/inngest/channels/openai";
 import { anthropicChannel } from "@/inngest/channels/anthropic";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import prisma from "@/lib/db";
+import { decrypt } from "@/lib/encrypt";
 
 Handlebars.registerHelper("json", (context) => {
     const jsonString = JSON.stringify(context, null, 2);
@@ -90,7 +91,7 @@ export const anthropicExecutor: NodeExecutor<AnthropicData> = async ({
     throw new NonRetriableError("Anthropic node: Credential not found");
   }
     const anthropic = createAnthropic({
-        apiKey: credential.value
+        apiKey: decrypt(credential.value),
     })
     try {
         const { steps } = await step.ai.wrap(
