@@ -29,6 +29,7 @@ export const ManualTriggerNode = memo((props:NodeProps<ManualTriggerNodeType>) =
         channel,
         refreshToken,
     });
+    console.log(nodeStatus);
 
     const handleOpenSettings = () => setDialogOpen(true);
 

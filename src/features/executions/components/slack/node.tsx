@@ -18,7 +18,7 @@ type SlackNodeData = {
 
 type SlackNodeType = Node<SlackNodeData>;
 
-export const DiscordNode = memo((props: NodeProps<SlackNodeType>) => {
+export const SlackNode = memo((props: NodeProps<SlackNodeType>) => {
     const [dialogOpen, setDialogOpen] = useState(false);
     const { setNodes } = useReactFlow();
     const channel = useMemo(()=>{
@@ -80,7 +80,7 @@ const nodeStatus = useNodeStatus({
     )
 });
 
-DiscordNode.displayName = "DiscordNode";
+SlackNode.displayName = "SlackNode";
 
 
 
