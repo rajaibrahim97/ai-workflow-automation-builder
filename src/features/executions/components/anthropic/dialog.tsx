@@ -18,13 +18,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -33,13 +26,20 @@ import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useCredentialsByType } from "@/features/credentials/hooks/use-credentials";
 import { CredentialType } from "@/generated/prisma";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import Image from "next/image";
 
 const formSchema = z.object({
   variableName: z
     .string()
     .min(1, { message: "Variable name is required" })
-    .regex(/^[A-Za-z_$][A-Za-z0-9_$]*$/, {
+    .regex(/^[A-Za-z_$][A-Za-z0-9_$]*$/, { 
       message: "Variable name must start with a letter or underscore and container only letters, numbers, and underscores",
     }),
   credentialId: z.string().min(1, "Credential is required"),
@@ -60,14 +60,12 @@ export const AnthropicDialog = ({
   open,
   onOpenChange,
   onSubmit,
-  defaultValues = {}
+  defaultValues = {},
 }: Props) => {
-
-  const {
+  const { 
     data: credentials,
     isLoading: isLoadingCredentials,
   } = useCredentialsByType(CredentialType.ANTHROPIC);
-
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -90,8 +88,8 @@ export const AnthropicDialog = ({
       });
     }
   }, [open, defaultValues, form]);
-  const watchVariableName = form.watch("variableName") || "myAnthropic"
 
+  const watchVariableName = form.watch("variableName") || "myAnthropic";
 
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
     onSubmit(values);
@@ -102,7 +100,7 @@ export const AnthropicDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>OpenAI Configuration</DialogTitle>
+          <DialogTitle>Anthropic Configuration</DialogTitle>
           <DialogDescription>
             Configure the AI model and prompts for this node.
           </DialogDescription>
@@ -125,13 +123,14 @@ export const AnthropicDialog = ({
                     />
                   </FormControl>
                   <FormDescription>
-                    Use this name to refrence the result in othernodes:{""}
+                    Use this name to reference the result in other nodes:{" "}
                     {`{{${watchVariableName}.text}}`}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="credentialId"
@@ -174,47 +173,47 @@ export const AnthropicDialog = ({
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="systemPrompt"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>System Prompt (Optional)</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="You are a helpful assistant."
-                      className="min-h-[80px] font-mono text-sm"
-                      {...field}
-                    />
-                  </FormControl>
+              <FormItem>
+                <FormLabel>System Prompt (Optional)</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="You are a helpful assistant."
+                    className="min-h-[80px] font-mono text-sm"
+                    {...field}
+                  />
+                </FormControl>
                   <FormDescription>
                     Sets the behavior of the assistant. Use {"{{variables}}"} for simple values or {"{{json variable}}"} to stringify objects
                   </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
+                <FormMessage />
+              </FormItem>
+            )}
             />
             <FormField
               control={form.control}
               name="userPrompt"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>User Prompt</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Summarize this text: {{json httpResponse.data}}"
-                      className="min-h-[120px] font-mono text-sm"
-                      {...field}
-                    />
-                  </FormControl>
+              <FormItem>
+                <FormLabel>User Prompt</FormLabel>
+                <FormControl>
+                  <Textarea
+                     placeholder="Summarize this text: {{json httpResponse.data}}"
+                    className="min-h-[120px] font-mono text-sm"
+                    {...field}
+                  />
+                </FormControl>
                   <FormDescription>
                     The prompt to send to the AI. Use {"{{variables}}"} for simple values or {"{{json variable}}"} to stringify objects
                   </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
+                <FormMessage />
+              </FormItem>
+            )}
             />
-
             <DialogFooter className="mt-4">
               <Button type="submit">Save</Button>
             </DialogFooter>

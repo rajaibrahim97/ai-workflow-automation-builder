@@ -30,6 +30,7 @@ export const StripeTriggerNode = memo((props:NodeProps<GoogleFormTriggerNodeType
         refreshToken,
     });
     
+    
 
     const handleOpenSettings = () => setDialogOpen(true);
 

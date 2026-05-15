@@ -1,34 +1,33 @@
-import { CredentialView } from "@/features/credentials/components/credential";
-import { CredentialItem, CredentialsError, CredentialsList, CredentialsLoading } from "@/features/credentials/components/credentials";
-import { requireAuth } from "@/lib/auth-utils"
+import { CredentialsContainer, CredentialsError, CredentialsList, CredentialsLoading } from "@/features/credentials/components/credentials";
+import { credentialsParamsLoader } from "@/features/credentials/server/params-loader";
+import { prefetchCredentials } from "@/features/credentials/server/prefetch";
+import { requireAuth } from "@/lib/auth-utils";
 import { HydrateClient } from "@/trpc/server";
+import { SearchParams } from "nuqs";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
-interface PageProps {
-    params: Promise<{
-        credentialId: string;
-    }>
-}
+type Props = {
+  searchParams: Promise<SearchParams>;
+};
 
-const Page = async ({params}:PageProps) => {
-    await requireAuth()
+const Page = async ({ searchParams }: Props) => {
+  await requireAuth();
 
-    const { credentialId } = await params;
+  const params = await credentialsParamsLoader(searchParams);
+  prefetchCredentials(params);
 
-    return (
-        <div className="p-4 md:px-10 md:py-6 h-full">
-            <div className="mx-auto max-w-3xl w-full flex flex-col gap-y-8 h-full">
-                <HydrateClient>
-                    <ErrorBoundary fallback={<CredentialsError/>}>
-                        <Suspense fallback={<CredentialsLoading/>}>
-                            <CredentialsList />
-                        </Suspense>
-                    </ErrorBoundary>
-                </HydrateClient>
-            </div>
-        </div>
-    )
-}
+  return (
+    <CredentialsContainer>
+      <HydrateClient>
+        <ErrorBoundary fallback={<CredentialsError />}>
+          <Suspense fallback={<CredentialsLoading />}>
+            <CredentialsList />
+          </Suspense>
+        </ErrorBoundary>
+      </HydrateClient>
+    </CredentialsContainer>
+  );
+};
 
-export default Page
+export default Page;

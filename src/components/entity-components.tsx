@@ -341,7 +341,7 @@ export const EntityItem = ({
                             {actions}
                             {onRemove && (
                                 <DropdownMenu>
-                                    <DropdownMenuTrigger>
+                                    <DropdownMenuTrigger asChild>
                                         <Button
                                             size="icon"
                                             variant="ghost"
