@@ -5,7 +5,7 @@ import { GlobeIcon } from "lucide-react";
 import { memo, useCallback, useMemo, useState } from "react";
 import { BaseExecutionNode } from "../base-execution-node";;
 import { useNodeStatus } from "../../hooks/use-node-status";
-import { openaiChannel } from "@/inngest/channels/openai";
+import { anthropicChannel } from "@/inngest/channels/anthropic";
 import { AnthropicDialog, AnthropicFormValues } from "./dialog";
 import { fetchAnthropicRealtimeToken } from "./actions";
 
@@ -23,7 +23,7 @@ export const AnthropicNode = memo((props: NodeProps<AnthropicNodeType>) => {
     const [dialogOpen, setDialogOpen] = useState(false);
     const { setNodes } = useReactFlow();
     const channel = useMemo(()=>{
-        return openaiChannel({
+        return anthropicChannel({
         workflowId:props.data.workflowId
     })
     },[props.data.workflowId]);

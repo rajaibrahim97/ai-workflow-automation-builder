@@ -5,7 +5,7 @@ import { GlobeIcon } from "lucide-react";
 import { memo, useCallback, useMemo, useState } from "react";
 import { BaseExecutionNode } from "../base-execution-node";;
 import { useNodeStatus } from "../../hooks/use-node-status";
-import { httpRequestChannel } from "@/inngest/channels/http-request";
+import { geminiChannel } from "@/inngest/channels/gemini";
 import { GeminiDialog, GeminiFormValues } from "./dialog";
 import { fetchGeminiRealtimeToken } from "./actions";
 
@@ -23,7 +23,7 @@ export const GeminiNode = memo((props: NodeProps<GeminiNodeType>) => {
     const [dialogOpen, setDialogOpen] = useState(false);
     const { setNodes } = useReactFlow();
     const channel = useMemo(()=>{
-        return httpRequestChannel({
+        return geminiChannel({
         workflowId:props.data.workflowId
     })
     },[props.data.workflowId]);

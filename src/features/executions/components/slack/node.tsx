@@ -5,7 +5,7 @@ import { GlobeIcon } from "lucide-react";
 import { memo, useCallback, useMemo, useState } from "react";
 import { BaseExecutionNode } from "../base-execution-node";;
 import { useNodeStatus } from "../../hooks/use-node-status";
-import { discordChannel } from "@/inngest/channels/discord";
+import { slackChannel } from "@/inngest/channels/slack";
 import { SlackDialog, SlackFormValues } from "./dialog";
 import { fetchSlackRealtimeToken } from "./actions";
 
@@ -22,7 +22,7 @@ export const SlackNode = memo((props: NodeProps<SlackNodeType>) => {
     const [dialogOpen, setDialogOpen] = useState(false);
     const { setNodes } = useReactFlow();
     const channel = useMemo(()=>{
-        return discordChannel({
+        return slackChannel({
         workflowId:props.data.workflowId
     })
     },[props.data.workflowId]);
