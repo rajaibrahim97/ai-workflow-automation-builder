@@ -31,105 +31,90 @@ export const anthropicExecutor: NodeExecutor<AnthropicData> = async ({
     step,
     userId
 }) => {
-    // Publish "Loading" state for http request
+    // Publish "Loading" state
     const channel = anthropicChannel({ workflowId })
-    console.log("[Executor] Publishing node-loading", { nodeId });
-    await step.realtime.publish("node-loading", channel.status, {
+
+    await step.realtime.publish(`node-loading-${nodeId}`, channel.status, {
         nodeId,
         status: "loading"
     })
 
-    if (!data.variableName) {
-        // Publish "error" state for http request
-        console.log("[Executor] Publishing node-error", { nodeId });
-        await step.realtime.publish("node-error", channel.status, {
-            nodeId,
-            status: "error"
-        });
-        throw new NonRetriableError("Anthropic node: Variable name is missing");
-    }
-    if (!data.credentialId) {
-        // Publish "error" state for http request
-        console.log("[Executor] Publishing node-error", { nodeId });
-        await step.realtime.publish("node-error", channel.status, {
-            nodeId,
-            status: "error"
-        });
-        throw new NonRetriableError("Anthropic node: Credential is required");
-    }
-
-
-    if (!data.userPrompt) {
-        // Publish "error" state for http request
-        console.log("[Executor] Publishing node-error", { nodeId });
-        await step.realtime.publish("node-error", channel.status, {
-            nodeId,
-            status: "error"
-        });
-        throw new NonRetriableError("Anthropic node: User prompt is missing");
-    }
-
-    const systemPrompt = data.systemPrompt
-        ? Handlebars.compile(data.systemPrompt)(context)
-        : "You are a helpful assistant.";
-    const userPrompt = Handlebars.compile(data.userPrompt)(context);
-
-      const credential = await step.run("get-credential", () => {
-    return prisma.credential.findUnique({
-      where: {
-        id: data.credentialId,
-        userId
-      },
-    });
-  });
-
-  if (!credential) {
-    await step.realtime.publish("node-error", channel.status, {
-            nodeId,
-            status: "error"
-        });
-    throw new NonRetriableError("Anthropic node: Credential not found");
-  }
-    const anthropic = createAnthropic({
-        apiKey: decrypt(credential.value),
-    })
     try {
-        const { steps } = await step.ai.wrap(
-            "gemini-generate-text",
-            generateText,
-            {
-                model: anthropic("claude-sonnet-4-5"),
-                system: systemPrompt,
-                prompt: userPrompt,
-                experimental_telemetry: {
-                    isEnabled: true,
-                    recordInputs: true,
-                    recordOutputs: true,
-                }
+        // SINGLE deterministic step boundary wrapping all execution
+        const result = await step.run(`anthropic-execution-${nodeId}`, async () => {
+            // === VALIDATION (inside step, like HTTP executor) ===
+            if (!data.variableName?.trim()) {
+                throw new NonRetriableError("Anthropic node: Variable name is missing");
             }
-        );
+            if (!data.credentialId) {
+                throw new NonRetriableError("Anthropic node: Credential is required");
+            }
+            if (!data.userPrompt?.trim()) {
+                throw new NonRetriableError("Anthropic node: User prompt is missing");
+            }
 
-        const text = steps[0].content[0].type === "text" ? steps[0]
-        .content[0].text: "";
+            // === CREDENTIAL FETCH (inside step, deterministic) ===
+            const credential = await prisma.credential.findUnique({
+                where: {
+                    id: data.credentialId,
+                    userId
+                },
+            });
 
-        await step.realtime.publish("node-success", channel.status, {
+            if (!credential) {
+                throw new NonRetriableError("Anthropic node: Credential not found");
+            }
+
+            // === TEMPLATE COMPILATION ===
+            const systemPrompt = data.systemPrompt
+                ? Handlebars.compile(data.systemPrompt)(context)
+                : "You are a helpful assistant.";
+            const userPrompt = Handlebars.compile(data.userPrompt)(context);
+
+            // === AI GENERATION (step.ai.wrap inside deterministic boundary) ===
+            const anthropic = createAnthropic({
+                apiKey: decrypt(credential.value),
+            })
+            const { steps } = await step.ai.wrap(
+                `anthropic-generate-text-${nodeId}`,
+                generateText,
+                {
+                    model: anthropic("claude-sonnet-4-5"),
+                    system: systemPrompt,
+                    prompt: userPrompt,
+                    experimental_telemetry: {
+                        isEnabled: true,
+                        recordInputs: true,
+                        recordOutputs: true,
+                    }
+                }
+            );
+
+            const text = steps[0].content[0].type === "text" ? steps[0]
+                .content[0].text : "";
+
+            return {
+                ...context,
+                [data.variableName]: {
+                    text,
+                },
+            }
+        });
+
+        // === SUCCESS: Publish after step completes ===
+        await step.realtime.publish(`node-success-${nodeId}`, channel.status, {
             nodeId,
             status: "success",
         });
 
-        return {
-      ...context,
-      [data.variableName]: {
-        text,
-      },
-    }
-
+        return result;
 
     } catch (error) {
-        await step.realtime.publish("node-error", channel.status, {
+        // === ERROR: Publish on any failure ===
+        await step.realtime.publish(`node-error-${nodeId}`, channel.status, {
             nodeId,
             status: "error"
         });
-        throw error
+        throw error;
     }
 }

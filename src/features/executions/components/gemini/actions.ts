@@ -2,17 +2,22 @@
 
 import { getClientSubscriptionToken } from "inngest/react";
 import { inngest } from "@/inngest/client";
-import { httpRequestChannel } from "@/inngest/channels/http-request";
 import { Realtime } from "inngest";
+import { geminiChannel } from "@/inngest/channels/gemini";
 
-type GeminiToken = Realtime.Subscribe.Token< 
-  typeof httpRequestChannel,
+type GeminiToken = Realtime.Subscribe.Token<
+  typeof geminiChannel,
   ["status"]
-  >;
-export async function fetchGeminiRealtimeToken(workflowId: string):Promise<GeminiToken> {
-    const token = await getClientSubscriptionToken(inngest, {
-    channel: httpRequestChannel({ workflowId }),
+>;
+
+export async function fetchGeminiRealtimeToken(
+  workflowId: string
+): Promise<GeminiToken> {
+
+  const token = await getClientSubscriptionToken(inngest, {
+    channel: geminiChannel({ workflowId }),
     topics: ["status"],
   });
-  return token as GeminiToken
+
+  return token as GeminiToken;
 }
