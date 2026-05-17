@@ -13,14 +13,14 @@ export const googleFormTriggerExecutor: NodeExecutor<GoogleFormTriggerData> = as
     const channel = googleFormTriggerChannel({workflowId})
     // Publish Loading State 
 
-    await step.realtime.publish("node-loading", channel.status,{
+    await step.realtime.publish(`node-loading-${nodeId}`, channel.status,{
         nodeId,
         status:"loading"
     })
     const result = await step.run("google-form-trigger", async () => context);
 
     // Publish "success" state for  trigger
-     await step.realtime.publish("node-success", channel.status, {
+     await step.realtime.publish(`node-success-${nodeId}`, channel.status, {
             nodeId,
             status:"success",
         });
