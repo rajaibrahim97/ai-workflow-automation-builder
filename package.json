@@ -4,13 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
+    "build": "prisma generate && next build --turbopack",
     "start": "next start",
     "lint": "biome check",
     "format": "biome format --write",
     "inngest:dev": "inngest-cli dev",
     "dev:all": "dotenv -- mprocs",
-    "ngrok:dev": "ngrok http --url=bulldog-patience-ritzy.ngrok-free.dev 3000"
+    "ngrok:dev": "ngrok http --url=bulldog-patience-ritzy.ngrok-free.dev 3000",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.43",
