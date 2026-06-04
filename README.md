@@ -41,26 +41,29 @@ Modern businesses require complex automation pipelines, but utilizing establishe
 
 ## Architecture
 ai-automation-builder is decoupled into three central logical layers: The UI Configuration Canvas, the Async Execution Engine, and the Real-time Event Monitor.
-```mermaid
-graph TD
-    A["⚡ 1. UI Configuration Layer <br> (Next.js App / React Flow Canvas / tRPC)"]
-    B["🔄 [Save / Manual Run]"]
-    C["⚙️ 2. Async Execution Layer <br> (Inngest Background Workers / Topological Sorting)"]
-    D["📡 [Websocket Live Data]"]
-    E["📊 3. Real-time Monitoring Layer <br> (Sentry / Event Listeners / Node Execution UI)"]
+```text
++------------------------------------------------------------+
+|                  1. UI Configuration Layer                 |
+|      (Next.js App / React Flow Canvas / tRPC Procedures)   |
++------------------------------------------------------------+
+                              |
+                      [Save / Manual Run]
+                              |
+                              v
++------------------------------------------------------------+
+|                 2. Async Execution Layer                   |
+|       (Inngest Background Workers / Topological Sorting)   |
++------------------------------------------------------------+
+                              |
+                    [Websocket Live Data]
+                              |
+                              v
++------------------------------------------------------------+
+|                 3. Real-time Monitoring Layer              |
+|        (Sentry / Event Listeners / Node Execution UI)      |
++------------------------------------------------------------+
+```
 
-    A --> B
-    B --> C
-    C --> D
-    D --> E
-
-    %% Define Styles
-    classDef layer style fill:#1f2937,stroke:#3b82f6,stroke-width:2px,color:#fff;
-    classDef action style fill:#111827,stroke:#94a3b8,stroke-width:1px,stroke-dasharray: 5 5,color:#94a3b8;
-
-    %% Apply Styles
-    class A,C,E layer;
-    class B,D action;
 
 ---
 
