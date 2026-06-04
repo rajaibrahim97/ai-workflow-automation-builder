@@ -1,4 +1,4 @@
-# ai-automation-builder 🚀
+# AI-Automation-Builder 🚀
 
 A production-ready, full-stack ai-workflow automation platform inspired by Zapier and n8n.
 
@@ -79,6 +79,12 @@ Below is the generalized ER structural model utilized by Prisma to map out workf
 
 ---
 
+## Screen Shots 
+![Nodebase Canvas Builder UI](./screenshots/canvas.png)
+
+---
+
+
 ## Installation
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
@@ -104,34 +110,34 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 
 ## Environement Setup
 
-# App Environment
+### App Environment
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 
-# Database Connections (Neon PostgreSQL)
+### Database Connections (Neon PostgreSQL)
 DATABASE_URL="postgresql://user:password@neon-host/nodebase?sslmode=require"
 
-# Better Auth Configuration
+### Better Auth Configuration
 BETTER_AUTH_SECRET="your_better_auth_secret_here"
 GITHUB_CLIENT_ID="your_github_client_id"
 GITHUB_CLIENT_SECRET="your_github_client_secret"
 GOOGLE_CLIENT_ID="your_google_client_id"
 GOOGLE_CLIENT_SECRET="your_google_client_secret"
 
-# Encryption Keys (For user integration API credentials)
+### Encryption Keys (For user integration API credentials)
 ENCRYPTION_KEY="your_secure_32_byte_hex_encryption_key"
 
-# Background Job Queue Engine (Inngest)
+### Background Job Queue Engine (Inngest)
 INNGEST_EVENT_KEY="your_inngest_event_key"
 INNGEST_SIGNING_KEY="your_inngest_signing_key"
 
-# Subscription & Payments (Polar)
+### Subscription & Payments (Polar)
 POLAR_ACCESS_TOKEN="your_polar_token"
 NEXT_PUBLIC_POLAR_SUCCESS_URL="http://localhost:3000/billing/success"
 
-# Observability & Monitoring
+### Observability & Monitoring
 SENTRY_DSN="your_sentry_dsn_url"
 
-## Deploy on Vercel
+### Deploy on Vercel
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
